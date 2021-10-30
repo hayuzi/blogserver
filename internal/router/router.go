@@ -3,12 +3,14 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	v1 "github.com/hayuzi/blogserver/internal/controller/v1"
+	"github.com/hayuzi/blogserver/internal/midddleware"
 )
 
 func NewRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+	r.Use(midddleware.Translations())
 
 	articleV1 := v1.NewArticle()
 	commentV1 := v1.NewComment()

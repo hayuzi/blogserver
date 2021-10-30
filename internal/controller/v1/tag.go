@@ -2,6 +2,8 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/hayuzi/blogserver/global"
+	fmtV1 "github.com/hayuzi/blogserver/internal/fmtter/v1"
 	"github.com/hayuzi/blogserver/pkg/app"
 	"github.com/hayuzi/blogserver/pkg/errcode"
 )
@@ -20,7 +22,14 @@ func (t Tag) Get(c *gin.Context) {
 	return
 }
 func (t Tag) List(c *gin.Context) {
-	app.NewResponse(c).ToResponseList([]int{1, 2}, 12)
+	params := fmtV1.TagListReq{}
+	response := app.NewResponse(c)
+	valid, errs := app.BindAndValid(c, &params)
+	if valid == true {
+		global.Logger.Errorf("app.BindAndValid errs: %v", errs)
+		response.ToResponseError(errcode.InvalidParams.WithDetails(errs.Errors()...))
+	}
+	response.ToResponseList([]int{1, 2}, 2)
 	return
 }
 func (t Tag) All(c *gin.Context) {
