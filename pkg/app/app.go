@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/hayuzi/blogserver/global"
 	"github.com/hayuzi/blogserver/pkg/errcode"
 	"net/http"
 )
@@ -27,7 +28,7 @@ func (r *Response) ToResponse(data interface{}) {
 	})
 }
 
-func (r *Response) ToResponseList(list interface{}, totalRows int) {
+func (r *Response) ToResponseList(list interface{}, totalRows int64) {
 	data := make(map[string]interface{})
 	data["lists"] = list
 	data["pageNum"] = GetPageNum(r.Ctx)
@@ -42,6 +43,7 @@ func (r *Response) ToResponseList(list interface{}, totalRows int) {
 }
 
 func (r *Response) ToResponseError(err *errcode.Error) {
+	global.Logger.Errorf("ToResponseError err: %v", err.Error())
 	response := gin.H{
 		"code": err.Code(),
 		"msg":  err.Msg(),
@@ -50,6 +52,7 @@ func (r *Response) ToResponseError(err *errcode.Error) {
 	details := err.Details()
 	if len(details) > 0 {
 		response["details"] = details
+		response["msg"] = err.Msg() + ": " + details[0]
 	}
 	r.Ctx.JSON(err.StatusCode(), response)
 }
