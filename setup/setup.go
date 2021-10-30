@@ -66,6 +66,7 @@ func setupLogger() error {
 		MaxAge:    10,  //最大生存周期为10天
 		LocalTime: true,
 	}
-	global.Logger = logger.NewLogger(ljLogger, "", log.LstdFlags).WithCaller(2)
+	// WithCaller(3) 回溯到入口文件
+	global.Logger = logger.NewLogger(ljLogger, "", log.LstdFlags).WithCaller(3)
 	return nil
 }

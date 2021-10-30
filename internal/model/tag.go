@@ -2,9 +2,9 @@ package model
 
 type Tag struct {
 	Model
-	TagName   string `json:"tag_name"`
+	TagName   string `json:"tagName"`
 	Weight    string `json:"weight"`
-	TagStatus int    `json:"tag_status"`
+	TagStatus int    `json:"tagStatus"`
 }
 
 // TableName 会将 的表名重写
