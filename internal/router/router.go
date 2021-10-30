@@ -20,6 +20,7 @@ func NewRouter() *gin.Engine {
 	{
 		//获取标签列表
 		apiV1.GET("/tags", tagV1.List)
+		apiV1.GET("/tag", tagV1.Get)
 		//获取所有标签
 		apiV1.GET("/tags/all", tagV1.All)
 
