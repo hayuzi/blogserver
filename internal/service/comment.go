@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	fmtV1 "github.com/hayuzi/blogserver/internal/fmtter/v1"
 	"github.com/hayuzi/blogserver/internal/model"
+	"github.com/hayuzi/blogserver/pkg/app"
 	"github.com/hayuzi/blogserver/pkg/errcode"
 )
 
@@ -16,6 +17,8 @@ func (svc *Service) CommentList(c *gin.Context, req *fmtV1.CommentListReq, res *
 }
 
 func (svc *Service) CommentCreate(c *gin.Context, req *fmtV1.CommentCreateReq, res *fmtV1.CommentCreateRes) *errcode.Error {
+	claims, _ := app.GetLoginClaims(c)
+	req.UserId = claims.Id
 	err := svc.dao.CommentCreate(c.Request.Context(), req, res)
 	if err != nil {
 		return errcode.CommentCreateFail.WithDetails([]string{err.Error()}...)

@@ -75,3 +75,11 @@ func (d *Dao) UserDetail(ctx context.Context, id int, res *model.User) error {
 	res.Id = id
 	return nil
 }
+
+func (d *Dao) UserChangePwd(ctx context.Context, id int, encodedPwd string) error {
+	tx := d.engine.WithContext(ctx)
+	if err := tx.Model(&model.User{}).Where("id = ?", id).Update("pwd = ?", encodedPwd).Error; err != nil {
+		return err
+	}
+	return nil
+}

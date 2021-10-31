@@ -20,3 +20,8 @@ Database:
   ParseTime: true
   MaxIdleConns: 10
   MaxOpenConns: 30
+JWT:
+  Secret: test
+  Issuer: gin-blog
+  Expire: 7200
+

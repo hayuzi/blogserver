@@ -25,7 +25,8 @@ func (d *Dao) CommentPaginatedList(ctx context.Context, req *fmtV1.CommentListRe
 	if err != nil {
 		return err
 	}
-	err = tx.Model(&model.Comment{}).Offset(offset).Limit(pageSize).Find(&res.Lists).Error
+	err = tx.Model(&model.Comment{}).Preload("User").Preload("MentionUser").
+		Offset(offset).Limit(pageSize).Find(&res.Lists).Error
 	if err != nil {
 		return err
 	}

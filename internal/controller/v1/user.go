@@ -10,18 +10,18 @@ import (
 	"strconv"
 )
 
-type Comment struct{}
+type User struct{}
 
-func NewComment() Comment {
-	return Comment{}
+func NewUser() User {
+	return User{}
 }
 
-func (t Comment) Get(c *gin.Context) {
-	res := model.Comment{}
+func (t User) Get(c *gin.Context) {
+	res := model.User{}
 	response := app.NewResponse(c)
 	id, _ := strconv.Atoi(c.Param("id"))
 	svc := service.New(c.Request.Context())
-	cusErr := svc.CommentDetail(c, id, &res)
+	cusErr := svc.UserDetail(c, id, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
 		return
@@ -29,9 +29,9 @@ func (t Comment) Get(c *gin.Context) {
 	response.ToResponse(res)
 	return
 }
-func (t Comment) List(c *gin.Context) {
-	req := fmtV1.CommentListReq{}
-	res := fmtV1.CommentListRes{}
+func (t User) List(c *gin.Context) {
+	req := fmtV1.UserListReq{}
+	res := fmtV1.UserListRes{}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &req)
 	if valid == true {
@@ -39,7 +39,7 @@ func (t Comment) List(c *gin.Context) {
 		return
 	}
 	svc := service.New(c.Request.Context())
-	cusErr := svc.CommentList(c, &req, &res)
+	cusErr := svc.UserList(c, &req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
 		return
@@ -48,9 +48,9 @@ func (t Comment) List(c *gin.Context) {
 	return
 }
 
-func (t Comment) Create(c *gin.Context) {
-	req := fmtV1.CommentCreateReq{}
-	res := fmtV1.CommentCreateRes{}
+func (t User) Create(c *gin.Context) {
+	req := fmtV1.UserCreateReq{}
+	res := fmtV1.UserCreateRes{}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &req)
 	if valid == true {
@@ -58,7 +58,7 @@ func (t Comment) Create(c *gin.Context) {
 		return
 	}
 	svc := service.New(c.Request.Context())
-	cusErr := svc.CommentCreate(c, &req, &res)
+	cusErr := svc.UserCreate(c, &req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
 		return
@@ -67,9 +67,9 @@ func (t Comment) Create(c *gin.Context) {
 	return
 }
 
-func (t Comment) Update(c *gin.Context) {
-	req := fmtV1.CommentUpdateReq{}
-	res := fmtV1.CommentUpdateRes{}
+func (t User) Update(c *gin.Context) {
+	req := fmtV1.UserUpdateReq{}
+	res := fmtV1.UserUpdateRes{}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &req)
 	if valid == true {
@@ -78,7 +78,7 @@ func (t Comment) Update(c *gin.Context) {
 	}
 	req.Id, _ = strconv.Atoi(c.Param("id"))
 	svc := service.New(c.Request.Context())
-	cusErr := svc.CommentUpdate(c, &req, &res)
+	cusErr := svc.UserUpdate(c, &req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
 		return
@@ -86,9 +86,9 @@ func (t Comment) Update(c *gin.Context) {
 	response.ToResponse(res)
 }
 
-func (t Comment) Delete(c *gin.Context) {
-	req := fmtV1.CommentDeleteReq{}
-	res := fmtV1.CommentDeleteRes{}
+func (t User) Delete(c *gin.Context) {
+	req := fmtV1.UserDeleteReq{}
+	res := fmtV1.UserDeleteRes{}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &req)
 	if valid == true {
@@ -97,7 +97,26 @@ func (t Comment) Delete(c *gin.Context) {
 	}
 	req.Id, _ = strconv.Atoi(c.Param("id"))
 	svc := service.New(c.Request.Context())
-	cusErr := svc.CommentDelete(c, &req, &res)
+	cusErr := svc.UserDelete(c, &req, &res)
+	if cusErr != nil {
+		response.ToResponseError(cusErr)
+		return
+	}
+	response.ToResponse(res)
+	return
+}
+
+func (t User) ChangePwd(c *gin.Context) {
+	req := fmtV1.UserChangePwdReq{}
+	res := fmtV1.UserChangePwdRes{}
+	response := app.NewResponse(c)
+	valid, errs := app.BindAndValid(c, &req)
+	if valid == true {
+		response.ToResponseError(errcode.InvalidParams.WithDetails(errs.Errors()...))
+		return
+	}
+	svc := service.New(c.Request.Context())
+	cusErr := svc.UserChangePwd(c, &req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
 		return

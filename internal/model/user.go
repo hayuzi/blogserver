@@ -4,7 +4,7 @@ type User struct {
 	Model
 	Username string `json:"username"`
 	Email    string `json:"email"`
-	Pwd      string `json:"pwd"`
+	Pwd      string `json:"-"`
 	UserType int    `json:"userType"`
 }
 
