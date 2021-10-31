@@ -5,6 +5,7 @@ import (
 	"github.com/hayuzi/blogserver/global"
 	"github.com/hayuzi/blogserver/pkg/errcode"
 	"net/http"
+	"runtime"
 )
 
 type Response struct {
@@ -43,7 +44,8 @@ func (r *Response) ToResponseList(list interface{}, totalRows int64) {
 }
 
 func (r *Response) ToResponseError(err *errcode.Error) {
-	global.Logger.Errorf("ToResponseError err: %v", err.Error())
+	_, file, line, _ := runtime.Caller(1)
+	global.Logger.Errorf("%s:%d %v", file, line, err.Error())
 	response := gin.H{
 		"code": err.Code(),
 		"msg":  err.Msg(),

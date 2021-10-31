@@ -3,7 +3,7 @@ package model
 type Tag struct {
 	Model
 	TagName   string `json:"tagName"`
-	Weight    string `json:"weight"`
+	Weight    int    `json:"weight"`
 	TagStatus int    `json:"tagStatus"`
 }
 
@@ -11,3 +11,6 @@ type Tag struct {
 func (t Tag) TableName() string {
 	return "blog_tag"
 }
+
+const TagStatusNormal = 1 // 正常
+const TagStatusHidden = 2 // 禁用

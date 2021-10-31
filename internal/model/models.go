@@ -13,10 +13,10 @@ import (
 )
 
 type Model struct {
-	Id        int            `gorm:"primary_key" json:"id"`
-	CreatedAt util.JSONTime  `json:"createdAt"` // 创建时间 datetime
-	UpdatedAt util.JSONTime  `json:"updatedAt"` // 更新时间 datetime
-	DeletedAt gorm.DeletedAt `json:"-"`         // 软删除字段(可以为NULL)  datetime
+	Id        int            `json:"id" gorm:"primary_key"`
+	CreatedAt util.JSONTime  `json:"createdAt" gorm:"autoCreateTime:milli"` // 创建时间 datetime
+	UpdatedAt util.JSONTime  `json:"updatedAt" gorm:"autoUpdateTime:milli"` // 更新时间 datetime
+	DeletedAt gorm.DeletedAt `json:"-"`                                     // 软删除字段(可以为NULL)  datetime
 }
 
 func NewDBEngine(dbSetting *setting.DatabaseSetting) (*gorm.DB, error) {
@@ -61,17 +61,10 @@ func NewDBEngine(dbSetting *setting.DatabaseSetting) (*gorm.DB, error) {
 }
 
 func (model *Model) BeforeCreate(db *gorm.DB) error {
-	model.CreatedAt = util.JSONTime{
-		Time: time.Now(),
-	}
-	model.UpdatedAt = util.JSONTime{
-		Time: time.Now(),
-	}
 	return nil
 }
 
-func (model *Model) BeforeUpdate(scope *gorm.DB) error {
-	// Gorm 会自动更新
+func (model *Model) BeforeUpdate(db *gorm.DB) error {
 	return nil
 }
 
