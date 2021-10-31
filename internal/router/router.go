@@ -12,6 +12,7 @@ func NewRouter() *gin.Engine {
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 	r.Use(midddleware.Translations())
+	r.Use(midddleware.Cors())
 
 	v1Article := v1.NewArticle()
 	v1Comment := v1.NewComment()
@@ -51,6 +52,7 @@ func NewRouter() *gin.Engine {
 	apiAdminV1 := r.Group("/admin/v1")
 	apiAdminV1.Use(midddleware.JWTAdmin())
 	{
+		// TODO@yuzi 做后续处理
 		apiAdminV1.GET("/dashboard", adminV1Common.Dashboard) //获取调色盘信息
 		apiAdminV1.GET("/tags", adminV1Tag.List)              //获取标签列表
 		apiAdminV1.POST("/tags", adminV1Tag.Create)           //新建标签
