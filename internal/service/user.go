@@ -1,64 +1,48 @@
 package service
 
 import (
-	"github.com/gin-gonic/gin"
-	fmtV1 "github.com/hayuzi/blogserver/internal/fmtter/v1"
+	fmtAdminV1 "github.com/hayuzi/blogserver/internal/fmtter/admin/v1"
+	fmtApiV1 "github.com/hayuzi/blogserver/internal/fmtter/api/v1"
 	"github.com/hayuzi/blogserver/internal/model"
 	"github.com/hayuzi/blogserver/pkg/app"
 	"github.com/hayuzi/blogserver/pkg/errcode"
 )
 
-func (svc *Service) UserList(c *gin.Context, req *fmtV1.UserListReq, res *fmtV1.UserListRes) *errcode.Error {
-	err := svc.dao.UserPaginatedList(c.Request.Context(), req, res)
+func (svc *Service) UserListAdmin(req *fmtAdminV1.UserListReq, res *fmtAdminV1.UserListRes) *errcode.Error {
+	err := svc.dao.UserPaginatedListAdmin(svc.ctx, req, res)
 	if err != nil {
-		return errcode.UserListFail.WithDetails([]string{err.Error()}...)
+		return errcode.UserListFail.WithDetails(err.Error())
 	}
 	return nil
 }
 
-func (svc *Service) UserCreate(c *gin.Context, req *fmtV1.UserCreateReq, res *fmtV1.UserCreateRes) *errcode.Error {
-	err := svc.dao.UserCreate(c.Request.Context(), req, res)
+func (svc *Service) UserDeleteAdmin(req *fmtAdminV1.UserDeleteReq, res *fmtAdminV1.UserDeleteRes) *errcode.Error {
+	err := svc.dao.UserDelete(svc.ctx, req.Id)
 	if err != nil {
-		return errcode.UserCreateFail.WithDetails([]string{err.Error()}...)
+		return errcode.UserDeleteFail.WithDetails(err.Error())
+	}
+	res.Id = req.Id
+	return nil
+}
+
+func (svc *Service) UserDetail(id int, res *model.User) *errcode.Error {
+	err := svc.dao.UserDetail(svc.ctx, id, res)
+	if err != nil {
+		return errcode.UserDetailFail.WithDetails(err.Error())
 	}
 	return nil
 }
 
-func (svc *Service) UserUpdate(c *gin.Context, req *fmtV1.UserUpdateReq, res *fmtV1.UserUpdateRes) *errcode.Error {
-	err := svc.dao.UserUpdate(c.Request.Context(), req, res)
-	if err != nil {
-		return errcode.UserUpdateFail.WithDetails([]string{err.Error()}...)
-	}
-	return nil
-}
-
-func (svc *Service) UserDelete(c *gin.Context, req *fmtV1.UserDeleteReq, res *fmtV1.UserDeleteRes) *errcode.Error {
-	err := svc.dao.UserDelete(c.Request.Context(), req, res)
-	if err != nil {
-		return errcode.UserDeleteFail.WithDetails([]string{err.Error()}...)
-	}
-	return nil
-}
-
-func (svc *Service) UserDetail(c *gin.Context, id int, res *model.User) *errcode.Error {
-	err := svc.dao.UserDetail(c.Request.Context(), id, res)
-	if err != nil {
-		return errcode.UserDetailFail.WithDetails([]string{err.Error()}...)
-	}
-	return nil
-}
-
-func (svc *Service) UserChangePwd(c *gin.Context, req *fmtV1.UserChangePwdReq, res *fmtV1.UserChangePwdRes) *errcode.Error {
+func (svc *Service) UserChangePwd(req *fmtApiV1.UserChangePwdReq, res *fmtApiV1.UserChangePwdRes) *errcode.Error {
 	if req.Confirm != req.Pwd {
 		return errcode.UserPwdConfirmFail
 	}
-	claims, _ := app.GetLoginClaims(c)
-	userId := claims.Id
-
+	loginUser := app.GetLoginUser(svc.ctx)
+	userId := loginUser.Id
 	userInfo := model.User{}
-	err := svc.dao.UserDetail(c.Request.Context(), userId, &userInfo)
+	err := svc.dao.UserDetail(svc.ctx, userId, &userInfo)
 	if err != nil {
-		return errcode.UserDetailFail.WithDetails([]string{err.Error()}...)
+		return errcode.UserDetailFail.WithDetails(err.Error())
 	}
 	encodedOldPwd := app.EncodePwd(req.Pwd)
 	if encodedOldPwd != userInfo.Pwd {
@@ -66,9 +50,10 @@ func (svc *Service) UserChangePwd(c *gin.Context, req *fmtV1.UserChangePwdReq, r
 	}
 
 	encodedNewPwd := app.EncodePwd(req.Password)
-	err = svc.dao.UserChangePwd(c.Request.Context(), userId, encodedNewPwd)
+	err = svc.dao.UserChangePwd(svc.ctx, userId, encodedNewPwd)
 	if err != nil {
-		return errcode.UserDetailFail.WithDetails([]string{err.Error()}...)
+		return errcode.UserDetailFail.WithDetails(err.Error())
 	}
+	res.Id = loginUser.Id
 	return nil
 }

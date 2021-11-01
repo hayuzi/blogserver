@@ -1,48 +1,67 @@
 package service
 
 import (
-	"github.com/gin-gonic/gin"
-	fmtV1 "github.com/hayuzi/blogserver/internal/fmtter/v1"
+	fmtAdminV1 "github.com/hayuzi/blogserver/internal/fmtter/admin/v1"
+	fmtApiV1 "github.com/hayuzi/blogserver/internal/fmtter/api/v1"
 	"github.com/hayuzi/blogserver/internal/model"
 	"github.com/hayuzi/blogserver/pkg/errcode"
 )
 
-func (svc *Service) ArticleList(c *gin.Context, req *fmtV1.ArticleListReq, res *fmtV1.ArticleListRes) *errcode.Error {
-	err := svc.dao.ArticlePaginatedList(c.Request.Context(), req, res)
+func (svc *Service) ArticleList(req *fmtApiV1.ArticleListReq, res *fmtApiV1.ArticleListRes) *errcode.Error {
+	err := svc.dao.ArticlePaginatedList(svc.ctx, req, res)
 	if err != nil {
-		return errcode.ArticleListFail.WithDetails([]string{err.Error()}...)
+		return errcode.ArticleListFail.WithDetails(err.Error())
 	}
 	return nil
 }
 
-func (svc *Service) ArticleCreate(c *gin.Context, req *fmtV1.ArticleCreateReq, res *fmtV1.ArticleCreateRes) *errcode.Error {
-	err := svc.dao.ArticleCreate(c.Request.Context(), req, res)
+func (svc *Service) ArticleListAdmin(req *fmtAdminV1.ArticleListReq, res *fmtAdminV1.ArticleListRes) *errcode.Error {
+	err := svc.dao.ArticlePaginatedListAdmin(svc.ctx, req, res)
 	if err != nil {
-		return errcode.ArticleCreateFail.WithDetails([]string{err.Error()}...)
+		return errcode.ArticleListFail.WithDetails(err.Error())
 	}
 	return nil
 }
 
-func (svc *Service) ArticleUpdate(c *gin.Context, req *fmtV1.ArticleUpdateReq, res *fmtV1.ArticleUpdateRes) *errcode.Error {
-	err := svc.dao.ArticleUpdate(c.Request.Context(), req, res)
+func (svc *Service) ArticleCreateAdmin(req *fmtAdminV1.ArticleCreateReq, res *fmtAdminV1.ArticleCreateRes) *errcode.Error {
+	err := svc.dao.ArticleCreateAdmin(svc.ctx, req, res)
 	if err != nil {
-		return errcode.ArticleUpdateFail.WithDetails([]string{err.Error()}...)
+		return errcode.ArticleCreateFail.WithDetails(err.Error())
 	}
 	return nil
 }
 
-func (svc *Service) ArticleDelete(c *gin.Context, req *fmtV1.ArticleDeleteReq, res *fmtV1.ArticleDeleteRes) *errcode.Error {
-	err := svc.dao.ArticleDelete(c.Request.Context(), req, res)
+func (svc *Service) ArticleUpdateAdmin(req *fmtAdminV1.ArticleUpdateReq, res *fmtAdminV1.ArticleUpdateRes) *errcode.Error {
+	err := svc.dao.ArticleUpdateAdmin(svc.ctx, req, res)
 	if err != nil {
-		return errcode.ArticleDeleteFail.WithDetails([]string{err.Error()}...)
+		return errcode.ArticleUpdateFail.WithDetails(err.Error())
 	}
 	return nil
 }
 
-func (svc *Service) ArticleDetail(c *gin.Context, id int, res *model.Article) *errcode.Error {
-	err := svc.dao.ArticleDetail(c.Request.Context(), id, res)
+func (svc *Service) ArticleDeleteAdmin(req *fmtAdminV1.ArticleDeleteReq, res *fmtAdminV1.ArticleDeleteRes) *errcode.Error {
+	err := svc.dao.ArticleDeleteAdmin(svc.ctx, req, res)
 	if err != nil {
-		return errcode.ArticleDetailFail.WithDetails([]string{err.Error()}...)
+		return errcode.ArticleDeleteFail.WithDetails(err.Error())
+	}
+	return nil
+}
+
+func (svc *Service) ArticleDetail(id int, res *model.Article) *errcode.Error {
+	err := svc.dao.ArticleDetail(svc.ctx, id, res, true)
+	if res.ArticleStatus != model.ArticleStatusPublished {
+		return errcode.ArticleDetailFail.WithDetails("文章草稿不可以访问")
+	}
+	if err != nil {
+		return errcode.ArticleDetailFail.WithDetails(err.Error())
+	}
+	return nil
+}
+
+func (svc *Service) ArticleDetailAdmin(id int, res *model.Article) *errcode.Error {
+	err := svc.dao.ArticleDetail(svc.ctx, id, res, true)
+	if err != nil {
+		return errcode.ArticleDetailFail.WithDetails(err.Error())
 	}
 	return nil
 }

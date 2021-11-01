@@ -16,5 +16,5 @@ func (t Comment) TableName() string {
 	return "blog_comment"
 }
 
-const ArticleStatusNormal = 1 // 展示
-const ArticleStatusHidden = 2 // 隐藏
+const CommentStatusNormal = 1 // 展示
+const CommentStatusHidden = 2 // 隐藏

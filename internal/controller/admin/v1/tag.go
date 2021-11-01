@@ -2,7 +2,7 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
-	fmtV1 "github.com/hayuzi/blogserver/internal/fmtter/v1"
+	fmtAdminV1 "github.com/hayuzi/blogserver/internal/fmtter/admin/v1"
 	"github.com/hayuzi/blogserver/internal/model"
 	"github.com/hayuzi/blogserver/internal/service"
 	"github.com/hayuzi/blogserver/pkg/app"
@@ -21,7 +21,7 @@ func (t Tag) Get(c *gin.Context) {
 	response := app.NewResponse(c)
 	id, _ := strconv.Atoi(c.Param("id"))
 	svc := service.New(c.Request.Context())
-	cusErr := svc.TagDetail(c, id, &res)
+	cusErr := svc.TagDetail(id, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
 		return
@@ -31,8 +31,8 @@ func (t Tag) Get(c *gin.Context) {
 }
 
 func (t Tag) List(c *gin.Context) {
-	req := fmtV1.TagListReq{}
-	res := fmtV1.TagListRes{}
+	req := fmtAdminV1.TagListReq{}
+	res := fmtAdminV1.TagListRes{}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &req)
 	if valid == true {
@@ -40,7 +40,7 @@ func (t Tag) List(c *gin.Context) {
 		return
 	}
 	svc := service.New(c.Request.Context())
-	cusErr := svc.TagList(c, &req, &res)
+	cusErr := svc.TagListAdmin(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
 		return
@@ -50,8 +50,8 @@ func (t Tag) List(c *gin.Context) {
 }
 
 func (t Tag) All(c *gin.Context) {
-	req := fmtV1.TagAllReq{}
-	res := fmtV1.TagAllRes{}
+	req := fmtAdminV1.TagAllReq{}
+	res := fmtAdminV1.TagAllRes{}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &req)
 	if valid == true {
@@ -59,7 +59,7 @@ func (t Tag) All(c *gin.Context) {
 		return
 	}
 	svc := service.New(c.Request.Context())
-	cusErr := svc.TagAll(c, &res)
+	cusErr := svc.TagAllAdmin(&res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
 		return
@@ -69,8 +69,8 @@ func (t Tag) All(c *gin.Context) {
 }
 
 func (t Tag) Create(c *gin.Context) {
-	req := fmtV1.TagCreateReq{}
-	res := fmtV1.TagCreateRes{}
+	req := fmtAdminV1.TagCreateReq{}
+	res := fmtAdminV1.TagCreateRes{}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &req)
 	if valid == true {
@@ -78,7 +78,7 @@ func (t Tag) Create(c *gin.Context) {
 		return
 	}
 	svc := service.New(c.Request.Context())
-	cusErr := svc.TagCreate(c, &req, &res)
+	cusErr := svc.TagCreateAdmin(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
 		return
@@ -88,8 +88,8 @@ func (t Tag) Create(c *gin.Context) {
 }
 
 func (t Tag) Update(c *gin.Context) {
-	req := fmtV1.TagUpdateReq{}
-	res := fmtV1.TagUpdateRes{}
+	req := fmtAdminV1.TagUpdateReq{}
+	res := fmtAdminV1.TagUpdateRes{}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &req)
 	if valid == true {
@@ -98,7 +98,7 @@ func (t Tag) Update(c *gin.Context) {
 	}
 	req.Id, _ = strconv.Atoi(c.Param("id"))
 	svc := service.New(c.Request.Context())
-	cusErr := svc.TagUpdate(c, &req, &res)
+	cusErr := svc.TagUpdateAdmin(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
 		return
@@ -108,8 +108,8 @@ func (t Tag) Update(c *gin.Context) {
 }
 
 func (t Tag) Delete(c *gin.Context) {
-	req := fmtV1.TagDeleteReq{}
-	res := fmtV1.TagDeleteRes{}
+	req := fmtAdminV1.TagDeleteReq{}
+	res := fmtAdminV1.TagDeleteRes{}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &req)
 	if valid == true {
@@ -118,7 +118,7 @@ func (t Tag) Delete(c *gin.Context) {
 	}
 	req.Id, _ = strconv.Atoi(c.Param("id"))
 	svc := service.New(c.Request.Context())
-	cusErr := svc.TagDelete(c, &req, &res)
+	cusErr := svc.TagDeleteAdmin(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
 		return

@@ -61,13 +61,11 @@ func (e *Error) StatusCode() int {
 		return http.StatusNotFound
 	case TooManyRequests.Code():
 		return http.StatusTooManyRequests
-	case UnauthorizedAuthNotExists.Code():
-		fallthrough
 	case UnauthorizedTokenError.Code():
 		fallthrough
 	case UnauthorizedTokenTimeout.Code():
 		fallthrough
-	case UnauthorizedTokenGenerate.Code():
+	case UnauthorizedUserNotAdmin.Code():
 		return http.StatusUnauthorized
 	}
 	// return http.StatusInternalServerError

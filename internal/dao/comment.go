@@ -2,12 +2,36 @@ package dao
 
 import (
 	"context"
-	fmtV1 "github.com/hayuzi/blogserver/internal/fmtter/v1"
+	fmtAdminV1 "github.com/hayuzi/blogserver/internal/fmtter/admin/v1"
+	fmtApiV1 "github.com/hayuzi/blogserver/internal/fmtter/api/v1"
 	"github.com/hayuzi/blogserver/internal/model"
 	"github.com/hayuzi/blogserver/pkg/app"
 )
 
-func (d *Dao) CommentPaginatedList(ctx context.Context, req *fmtV1.CommentListReq, res *fmtV1.CommentListRes) error {
+func (d *Dao) CommentPaginatedList(ctx context.Context, req *fmtApiV1.CommentListReq, res *fmtApiV1.CommentListRes) error {
+	res.Lists = make([]model.Comment, 0)
+	pageNum, pageSize := app.InitPagination(req.PageNum, req.PageSize)
+	offset := app.GetPageOffset(pageNum, pageSize)
+	tx := d.engine.WithContext(ctx).Where("comment_status = ?", model.CommentStatusNormal)
+	if req.UserId > 0 {
+		tx = tx.Where("user_id = ?", req.UserId)
+	}
+	if req.ArticleId > 0 {
+		tx = tx.Where("article_id = ?", req.ArticleId)
+	}
+	err := tx.Model(&model.Comment{}).Count(&res.Total).Error
+	if err != nil {
+		return err
+	}
+	err = tx.Model(&model.Comment{}).Preload("User").Preload("MentionUser").
+		Offset(offset).Limit(pageSize).Find(&res.Lists).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *Dao) CommentPaginatedListAdmin(ctx context.Context, req *fmtAdminV1.CommentListReq, res *fmtAdminV1.CommentListRes) error {
 	res.Lists = make([]model.Comment, 0)
 	pageNum, pageSize := app.InitPagination(req.PageNum, req.PageSize)
 	offset := app.GetPageOffset(pageNum, pageSize)
@@ -25,7 +49,7 @@ func (d *Dao) CommentPaginatedList(ctx context.Context, req *fmtV1.CommentListRe
 	if err != nil {
 		return err
 	}
-	err = tx.Model(&model.Comment{}).Preload("User").Preload("MentionUser").
+	err = tx.Model(&model.Comment{}).Preload("User").Preload("MentionUser").Order("id DESC").
 		Offset(offset).Limit(pageSize).Find(&res.Lists).Error
 	if err != nil {
 		return err
@@ -33,13 +57,13 @@ func (d *Dao) CommentPaginatedList(ctx context.Context, req *fmtV1.CommentListRe
 	return nil
 }
 
-func (d *Dao) CommentCreate(ctx context.Context, req *fmtV1.CommentCreateReq, res *fmtV1.CommentCreateRes) error {
+func (d *Dao) CommentCreate(ctx context.Context, req *fmtApiV1.CommentCreateReq, res *fmtApiV1.CommentCreateRes) error {
 	Comment := model.Comment{
 		ArticleId:     req.ArticleId,
 		UserId:        req.UserId,
 		MentionUserId: req.MentionUserId,
 		Content:       req.Content,
-		CommentStatus: req.CommentStatus,
+		CommentStatus: model.CommentStatusNormal,
 	}
 	tx := d.engine.WithContext(ctx)
 	if err := tx.Create(&Comment).Error; err != nil {
@@ -49,7 +73,7 @@ func (d *Dao) CommentCreate(ctx context.Context, req *fmtV1.CommentCreateReq, re
 	return nil
 }
 
-func (d *Dao) CommentUpdate(ctx context.Context, req *fmtV1.CommentUpdateReq, res *fmtV1.CommentUpdateRes) error {
+func (d *Dao) CommentUpdate(ctx context.Context, req *fmtApiV1.CommentUpdateReq, res *fmtApiV1.CommentUpdateRes) error {
 	updateData := model.Comment{
 		ArticleId:     req.ArticleId,
 		UserId:        req.UserId,
@@ -65,7 +89,7 @@ func (d *Dao) CommentUpdate(ctx context.Context, req *fmtV1.CommentUpdateReq, re
 	return nil
 }
 
-func (d *Dao) CommentDelete(ctx context.Context, req *fmtV1.CommentDeleteReq, res *fmtV1.CommentDeleteRes) error {
+func (d *Dao) CommentDeleteAdmin(ctx context.Context, req *fmtAdminV1.CommentDeleteReq, res *fmtAdminV1.CommentDeleteRes) error {
 	tx := d.engine.WithContext(ctx)
 	if err := tx.Where("id = ?", req.Id).Delete(&model.Comment{}).Error; err != nil {
 		return err
@@ -76,7 +100,7 @@ func (d *Dao) CommentDelete(ctx context.Context, req *fmtV1.CommentDeleteReq, re
 
 func (d *Dao) CommentDetail(ctx context.Context, id int, res *model.Comment) error {
 	tx := d.engine.WithContext(ctx)
-	if err := tx.Where("id = ?", id).Delete(&res).Error; err != nil {
+	if err := tx.Where("id = ?", id).First(&res).Error; err != nil {
 		return err
 	}
 	res.Id = id

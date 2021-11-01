@@ -2,12 +2,14 @@ package dao
 
 import (
 	"context"
-	fmtV1 "github.com/hayuzi/blogserver/internal/fmtter/v1"
+	"errors"
+	fmtAdminV1 "github.com/hayuzi/blogserver/internal/fmtter/admin/v1"
 	"github.com/hayuzi/blogserver/internal/model"
 	"github.com/hayuzi/blogserver/pkg/app"
+	"gorm.io/gorm"
 )
 
-func (d *Dao) UserPaginatedList(ctx context.Context, req *fmtV1.UserListReq, res *fmtV1.UserListRes) error {
+func (d *Dao) UserPaginatedListAdmin(ctx context.Context, req *fmtAdminV1.UserListReq, res *fmtAdminV1.UserListRes) error {
 	res.Lists = make([]model.User, 0)
 	pageNum, pageSize := app.InitPagination(req.PageNum, req.PageSize)
 	offset := app.GetPageOffset(pageNum, pageSize)
@@ -22,64 +24,64 @@ func (d *Dao) UserPaginatedList(ctx context.Context, req *fmtV1.UserListReq, res
 	if err != nil {
 		return err
 	}
-	err = tx.Model(&model.User{}).Offset(offset).Limit(pageSize).Find(&res.Lists).Error
+	err = tx.Model(&model.User{}).Order("id DESC").Offset(offset).Limit(pageSize).Find(&res.Lists).Error
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (d *Dao) UserCreate(ctx context.Context, req *fmtV1.UserCreateReq, res *fmtV1.UserCreateRes) error {
-	User := model.User{
-		Username: req.Username,
-		Email:    req.Email,
-		Pwd:      req.Pwd,
-		UserType: model.UserTypeUser,
-	}
+func (d *Dao) UserCreate(ctx context.Context, user *model.User) error {
 	tx := d.engine.WithContext(ctx)
-	if err := tx.Create(&User).Error; err != nil {
+	if err := tx.Create(user).Error; err != nil {
 		return err
 	}
-	res.Id = User.Id
 	return nil
 }
 
-func (d *Dao) UserUpdate(ctx context.Context, req *fmtV1.UserUpdateReq, res *fmtV1.UserUpdateRes) error {
-	updateData := model.User{
-		Username: req.Username,
-		Email:    req.Email,
-		Pwd:      req.Pwd,
-	}
+func (d *Dao) UserDelete(ctx context.Context, id int) error {
 	tx := d.engine.WithContext(ctx)
-	if err := tx.Where("id = ?", req.Id).Updates(&updateData).Error; err != nil {
+	if err := tx.Where("id = ?", id).Delete(&model.User{}).Error; err != nil {
 		return err
 	}
-	res.Id = req.Id
-	return nil
-}
-
-func (d *Dao) UserDelete(ctx context.Context, req *fmtV1.UserDeleteReq, res *fmtV1.UserDeleteRes) error {
-	tx := d.engine.WithContext(ctx)
-	if err := tx.Where("id = ?", req.Id).Delete(&model.User{}).Error; err != nil {
-		return err
-	}
-	res.Id = req.Id
 	return nil
 }
 
 func (d *Dao) UserDetail(ctx context.Context, id int, res *model.User) error {
 	tx := d.engine.WithContext(ctx)
-	if err := tx.Where("id = ?", id).Delete(&res).Error; err != nil {
+	if err := tx.Where("id = ?", id).First(&res).Error; err != nil {
 		return err
 	}
-	res.Id = id
 	return nil
 }
 
 func (d *Dao) UserChangePwd(ctx context.Context, id int, encodedPwd string) error {
 	tx := d.engine.WithContext(ctx)
-	if err := tx.Model(&model.User{}).Where("id = ?", id).Update("pwd = ?", encodedPwd).Error; err != nil {
+	if err := tx.Model(&model.User{}).Where("id = ?", id).Update("pwd", encodedPwd).Error; err != nil {
 		return err
 	}
 	return nil
+}
+
+func (d *Dao) UserByUsername(ctx context.Context, username string, res *model.User) error {
+	tx := d.engine.WithContext(ctx)
+	if err := tx.Where("username = ?", username).First(&res).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *Dao) UserExistsByUsername(ctx context.Context, username string, id int) (bool, error) {
+	tx := d.engine.WithContext(ctx)
+	user := model.User{}
+	if err := tx.Where("username = ?", username).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+	if (id == 0) || (id > 0 && id != user.Id) {
+		return true, nil
+	}
+	return false, nil
 }

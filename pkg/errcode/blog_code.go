@@ -23,4 +23,6 @@ var (
 	UserDeleteFail     = NewError(20001034, "用户删除失败")
 	UserPwdConfirmFail = NewError(20001035, "两次输入的密码不一样")
 	UserOldPwdError    = NewError(20001036, "原密码不正确")
+
+	UploadFileFail = NewError(20002001, "上传文件失败")
 )
