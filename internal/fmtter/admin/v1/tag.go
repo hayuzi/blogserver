@@ -24,7 +24,7 @@ type TagAllRes struct {
 // TagCreateReq 标签创建
 type TagCreateReq struct {
 	TagName   string `json:"tagName" form:"tagName" binding:"required,min=1,max=64"`
-	Weight    int    `json:"weight" form:"weight" binding:"required,min=0,max=100"`
+	Weight    int    `json:"weight" form:"weight" binding:"min=0,max=100"`
 	TagStatus int    `json:"tagStatus" form:"tagStatus" binding:"required,min=1,max=2"`
 }
 type TagCreateRes struct {
@@ -35,7 +35,7 @@ type TagCreateRes struct {
 type TagUpdateReq struct {
 	Id        int    `json:"id" form:"id"` // 从路由获取注入
 	TagName   string `json:"tagName" form:"tagName" binding:"required,min=1,max=64"`
-	Weight    int    `json:"weight" form:"weight" binding:"required,min=0,max=100"`
+	Weight    int    `json:"weight" form:"weight" binding:"min=0,max=100"`
 	TagStatus int    `json:"tagStatus" form:"tagStatus" binding:"required,min=1,max=2"`
 }
 type TagUpdateRes struct {
