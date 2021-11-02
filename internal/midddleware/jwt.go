@@ -1,10 +1,12 @@
 package midddleware
 
 import (
+	"context"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/hayuzi/blogserver/internal/model"
 	"github.com/hayuzi/blogserver/pkg/app"
+	"github.com/hayuzi/blogserver/pkg/consts"
 	"github.com/hayuzi/blogserver/pkg/errcode"
 )
 
@@ -76,6 +78,15 @@ func JWTAdmin() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		c.Next()
+	}
+}
+
+func JWTInjectClaims() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		claims, _ := app.GetJwtClaims(c)
+		ctx := context.WithValue(c.Request.Context(), consts.ContextLoginUserKey, claims)
+		c.Request = c.Request.WithContext(ctx)
 		c.Next()
 	}
 }

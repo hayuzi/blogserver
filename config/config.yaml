@@ -9,6 +9,13 @@ APP:
   LogSavePath: storage/logs
   LogFileName: app
   LogFileExt: .log
+  UploadSavePath: storage/upload
+  UploadSaveUrl: http://127.0.0.1:8081/static
+  UploadImageMaxSize: 5 # MB
+  UploadImageAllowExts:
+    - .jpg
+    - .jpeg
+    - .png
 Database:
   DbType: mysql
   UserName: root
@@ -23,5 +30,6 @@ Database:
 JWT:
   Secret: test
   Issuer: gin-blog
-  Expire: 7200
+  Expire: 7200 #min
+
 

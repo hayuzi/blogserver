@@ -2,25 +2,44 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/hayuzi/blogserver/global"
 	adminV1 "github.com/hayuzi/blogserver/internal/controller/admin/v1"
+	v0 "github.com/hayuzi/blogserver/internal/controller/api/v0"
 	v1 "github.com/hayuzi/blogserver/internal/controller/api/v1"
 	"github.com/hayuzi/blogserver/internal/midddleware"
+	"net/http"
 )
 
 func NewRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+	r.Use(midddleware.AccessLog())
 	r.Use(midddleware.Translations())
 	r.Use(midddleware.Cors())
+	r.Use(midddleware.JWTInjectClaims())
 
+	v0Auth := v0.NewAuth()
+	v0Upload := v0.NewUpload()
+
+	// 静态文件访问
+	r.StaticFS("/static", http.Dir(global.AppSetting.UploadSavePath))
+
+	// 通用接口
+	apiV0 := r.Group("/api/v0")
+	{
+		apiV0.POST("/register", v0Auth.AuthRegister)
+		apiV0.GET("/auth", v0Auth.AuthLogin)
+		apiV0.GET("/admin-auth", v0Auth.AuthAdminLogin)
+		apiV0.POST("/upload", v0Upload.UploadFile)
+	}
+
+	// 业务接口v1
 	v1Article := v1.NewArticle()
 	v1Comment := v1.NewComment()
 	v1Tag := v1.NewTag()
 	v1User := v1.NewUser()
 
-	// 通用接口
-	// 业务接口v1
 	apiV1 := r.Group("/api/v1")
 	{
 		apiV1.GET("/tags", v1Tag.List)    //获取标签列表
@@ -52,7 +71,6 @@ func NewRouter() *gin.Engine {
 	apiAdminV1 := r.Group("/admin/v1")
 	apiAdminV1.Use(midddleware.JWTAdmin())
 	{
-		// TODO@yuzi 做后续处理
 		apiAdminV1.GET("/dashboard", adminV1Common.Dashboard) //获取调色盘信息
 		apiAdminV1.GET("/tags", adminV1Tag.List)              //获取标签列表
 		apiAdminV1.POST("/tags", adminV1Tag.Create)           //新建标签

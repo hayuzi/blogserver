@@ -21,8 +21,7 @@ type CommentCreateReq struct {
 	UserId        int    `json:"userId" form:"userId"` // 登陆状态中获取
 	MentionUserId int    `json:"mentionUserId" form:"mentionUserId" binding:"min=0"`
 	ArticleId     int    `json:"articleId" form:"articleId" binding:"required,min=0"`
-	Content       string `json:"content" form:"title" binding:"required,min=1,max=1024"`
-	CommentStatus int    `json:"commentStatus" form:"commentStatus" binding:"required,min=1,max=2"`
+	Content       string `json:"content" form:"content" binding:"required,min=1,max=1024"`
 }
 type CommentCreateRes struct {
 	Id int `json:"id"`

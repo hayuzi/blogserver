@@ -19,10 +19,10 @@ type ArticleListRes struct {
 // ArticleCreateReq 文章创建
 type ArticleCreateReq struct {
 	Title         string `json:"title" form:"title" binding:"required,min=1,max=255"`
-	Sketch        string `json:"sketch" form:"sketch" binding:"required,min=1,max=255"`
-	Content       string `json:"content" form:"title" binding:"required,min=1,max=65535"`
-	TagId         int    `json:"tagId" form:"tagId" binding:"required,min=0"`
-	Weight        int    `json:"weight" form:"weight" binding:"required,min=0,max=100"`
+	Sketch        string `json:"sketch" form:"sketch" binding:"min=0,max=255"`
+	Content       string `json:"content" form:"content" binding:"required,min=1,max=65535"`
+	TagId         int    `json:"tagId" form:"tagId" binding:"required,min=1"`
+	Weight        int    `json:"weight" form:"weight" binding:"min=0,max=100"`
 	ArticleStatus int    `json:"articleStatus" form:"articleStatus" binding:"required,min=1,max=2"`
 }
 type ArticleCreateRes struct {
@@ -33,10 +33,10 @@ type ArticleCreateRes struct {
 type ArticleUpdateReq struct {
 	Id            int    `json:"id" form:"id"` // 从路由获取注入
 	Title         string `json:"title" form:"title" binding:"required,min=1,max=255"`
-	Sketch        string `json:"sketch" form:"sketch" binding:"required,min=1,max=255"`
-	Content       string `json:"content" form:"title" binding:"required,min=1,max=65535"`
-	TagId         int    `json:"tagId" form:"tagId" binding:"required,min=0"`
-	Weight        int    `json:"weight" form:"weight" binding:"required,min=0,max=100"`
+	Sketch        string `json:"sketch" form:"sketch" binding:"min=0,max=255"`
+	Content       string `json:"content" form:"content" binding:"required,min=1,max=65535"`
+	TagId         int    `json:"tagId" form:"tagId" binding:"required,min=1"`
+	Weight        int    `json:"weight" form:"weight" binding:"min=0,max=100"`
 	ArticleStatus int    `json:"articleStatus" form:"articleStatus" binding:"required,min=1,max=2"`
 }
 type ArticleUpdateRes struct {

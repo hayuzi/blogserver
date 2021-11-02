@@ -1,9 +1,11 @@
 package app
 
 import (
+	"context"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/hayuzi/blogserver/global"
+	"github.com/hayuzi/blogserver/pkg/consts"
 	"time"
 )
 
@@ -18,7 +20,7 @@ func GetJwtSecret() string {
 	return global.JWTSetting.Secret
 }
 
-func GenerateToken(userId int, username, password string, userType int) (string, error) {
+func GenerateToken(userId int, username string, userType int) (string, error) {
 	nowTime := time.Now()
 	expireTime := nowTime.Add(global.JWTSetting.Expire)
 
@@ -31,16 +33,14 @@ func GenerateToken(userId int, username, password string, userType int) (string,
 			Issuer:    global.JWTSetting.Issuer,
 		},
 	}
-
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	token, err := tokenClaims.SignedString(GetJwtSecret())
-
+	token, err := tokenClaims.SignedString([]byte(GetJwtSecret()))
 	return token, err
 }
 
 func ParseToken(token string) (*Claims, error) {
 	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return GetJwtSecret(), nil
+		return []byte(GetJwtSecret()), nil
 	})
 
 	if tokenClaims != nil {
@@ -52,8 +52,8 @@ func ParseToken(token string) (*Claims, error) {
 	return nil, err
 }
 
-// GetLoginClaims 获取jwt登陆用户的基础信息
-func GetLoginClaims(c *gin.Context) (*Claims, error) {
+// GetJwtClaims 获取jwt登陆用户的基础信息
+func GetJwtClaims(c *gin.Context) (*Claims, error) {
 	token := ""
 	if s, ok := c.GetQuery("token"); ok {
 		token = s
@@ -63,4 +63,14 @@ func GetLoginClaims(c *gin.Context) (*Claims, error) {
 	var claims = &Claims{}
 	claims, _ = ParseToken(token)
 	return claims, nil
+}
+
+// GetLoginUser 获取登陆用户的基础信息
+func GetLoginUser(ctx context.Context) *Claims {
+	v := ctx.Value(consts.ContextLoginUserKey)
+	claims, ok := v.(*Claims)
+	if !ok {
+		claims = &Claims{}
+	}
+	return claims
 }

@@ -1,51 +1,59 @@
 package service
 
 import (
-	"github.com/gin-gonic/gin"
-	fmtV1 "github.com/hayuzi/blogserver/internal/fmtter/v1"
+	fmtAdminV1 "github.com/hayuzi/blogserver/internal/fmtter/admin/v1"
+	fmtApiV1 "github.com/hayuzi/blogserver/internal/fmtter/api/v1"
 	"github.com/hayuzi/blogserver/internal/model"
 	"github.com/hayuzi/blogserver/pkg/app"
 	"github.com/hayuzi/blogserver/pkg/errcode"
 )
 
-func (svc *Service) CommentList(c *gin.Context, req *fmtV1.CommentListReq, res *fmtV1.CommentListRes) *errcode.Error {
-	err := svc.dao.CommentPaginatedList(c.Request.Context(), req, res)
+func (svc *Service) CommentList(req *fmtApiV1.CommentListReq, res *fmtApiV1.CommentListRes) *errcode.Error {
+	err := svc.dao.CommentPaginatedList(svc.ctx, req, res)
 	if err != nil {
-		return errcode.CommentListFail.WithDetails([]string{err.Error()}...)
+		return errcode.CommentListFail.WithDetails(err.Error())
 	}
 	return nil
 }
 
-func (svc *Service) CommentCreate(c *gin.Context, req *fmtV1.CommentCreateReq, res *fmtV1.CommentCreateRes) *errcode.Error {
-	claims, _ := app.GetLoginClaims(c)
-	req.UserId = claims.Id
-	err := svc.dao.CommentCreate(c.Request.Context(), req, res)
+func (svc *Service) CommentListAdmin(req *fmtAdminV1.CommentListReq, res *fmtAdminV1.CommentListRes) *errcode.Error {
+	err := svc.dao.CommentPaginatedListAdmin(svc.ctx, req, res)
 	if err != nil {
-		return errcode.CommentCreateFail.WithDetails([]string{err.Error()}...)
+		return errcode.CommentListFail.WithDetails(err.Error())
 	}
 	return nil
 }
 
-func (svc *Service) CommentUpdate(c *gin.Context, req *fmtV1.CommentUpdateReq, res *fmtV1.CommentUpdateRes) *errcode.Error {
-	err := svc.dao.CommentUpdate(c.Request.Context(), req, res)
+func (svc *Service) CommentCreate(req *fmtApiV1.CommentCreateReq, res *fmtApiV1.CommentCreateRes) *errcode.Error {
+	loginUser := app.GetLoginUser(svc.ctx)
+	req.UserId = loginUser.Id
+	err := svc.dao.CommentCreate(svc.ctx, req, res)
 	if err != nil {
-		return errcode.CommentUpdateFail.WithDetails([]string{err.Error()}...)
+		return errcode.CommentCreateFail.WithDetails(err.Error())
 	}
 	return nil
 }
 
-func (svc *Service) CommentDelete(c *gin.Context, req *fmtV1.CommentDeleteReq, res *fmtV1.CommentDeleteRes) *errcode.Error {
-	err := svc.dao.CommentDelete(c.Request.Context(), req, res)
+func (svc *Service) CommentUpdate(req *fmtApiV1.CommentUpdateReq, res *fmtApiV1.CommentUpdateRes) *errcode.Error {
+	err := svc.dao.CommentUpdate(svc.ctx, req, res)
 	if err != nil {
-		return errcode.CommentDeleteFail.WithDetails([]string{err.Error()}...)
+		return errcode.CommentUpdateFail.WithDetails(err.Error())
 	}
 	return nil
 }
 
-func (svc *Service) CommentDetail(c *gin.Context, id int, res *model.Comment) *errcode.Error {
-	err := svc.dao.CommentDetail(c.Request.Context(), id, res)
+func (svc *Service) CommentDeleteAdmin(req *fmtAdminV1.CommentDeleteReq, res *fmtAdminV1.CommentDeleteRes) *errcode.Error {
+	err := svc.dao.CommentDeleteAdmin(svc.ctx, req, res)
 	if err != nil {
-		return errcode.CommentDetailFail.WithDetails([]string{err.Error()}...)
+		return errcode.CommentDeleteFail.WithDetails(err.Error())
+	}
+	return nil
+}
+
+func (svc *Service) CommentDetail(id int, res *model.Comment) *errcode.Error {
+	err := svc.dao.CommentDetail(svc.ctx, id, res)
+	if err != nil {
+		return errcode.CommentDetailFail.WithDetails(err.Error())
 	}
 	return nil
 }

@@ -1,27 +1,31 @@
-package v1
+package v0
 
 import (
 	"github.com/gin-gonic/gin"
-	fmtApiV1 "github.com/hayuzi/blogserver/internal/fmtter/api/v1"
+	fmtApiV0 "github.com/hayuzi/blogserver/internal/fmtter/api/v0"
 	"github.com/hayuzi/blogserver/internal/model"
 	"github.com/hayuzi/blogserver/internal/service"
 	"github.com/hayuzi/blogserver/pkg/app"
 	"github.com/hayuzi/blogserver/pkg/errcode"
-	"strconv"
 )
 
-type Tag struct{}
+type Auth struct{}
 
-func NewTag() Tag {
-	return Tag{}
+func NewAuth() Auth {
+	return Auth{}
 }
 
-func (t Tag) Get(c *gin.Context) {
-	res := model.Tag{}
+func (t Auth) AuthRegister(c *gin.Context) {
+	req := fmtApiV0.AuthRegisterReq{}
+	res := fmtApiV0.AuthRegisterRes{}
 	response := app.NewResponse(c)
-	id, _ := strconv.Atoi(c.Param("id"))
+	valid, errs := app.BindAndValid(c, &req)
+	if valid == true {
+		response.ToResponseError(errcode.InvalidParams.WithDetails(errs.Errors()...))
+		return
+	}
 	svc := service.New(c.Request.Context())
-	cusErr := svc.TagDetail(id, &res)
+	cusErr := svc.AuthRegister(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
 		return
@@ -30,9 +34,9 @@ func (t Tag) Get(c *gin.Context) {
 	return
 }
 
-func (t Tag) List(c *gin.Context) {
-	req := fmtApiV1.TagListReq{}
-	res := fmtApiV1.TagListRes{}
+func (t Auth) AuthLogin(c *gin.Context) {
+	req := fmtApiV0.AuthLoginReq{}
+	res := fmtApiV0.AuthLoginRes{}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &req)
 	if valid == true {
@@ -40,18 +44,18 @@ func (t Tag) List(c *gin.Context) {
 		return
 	}
 	svc := service.New(c.Request.Context())
-	cusErr := svc.TagList(&req, &res)
+	cusErr := svc.AuthLogin(model.UserTypeUser, &req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
 		return
 	}
-	response.ToResponseList(res.Lists, res.Total)
+	response.ToResponse(res)
 	return
 }
 
-func (t Tag) All(c *gin.Context) {
-	req := fmtApiV1.TagAllReq{}
-	res := fmtApiV1.TagAllRes{}
+func (t Auth) AuthAdminLogin(c *gin.Context) {
+	req := fmtApiV0.AuthLoginReq{}
+	res := fmtApiV0.AuthLoginRes{}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &req)
 	if valid == true {
@@ -59,11 +63,11 @@ func (t Tag) All(c *gin.Context) {
 		return
 	}
 	svc := service.New(c.Request.Context())
-	cusErr := svc.TagAll(&res)
+	cusErr := svc.AuthLogin(model.UserTypeAdmin, &req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
 		return
 	}
-	response.ToResponseList(res.Lists, int64(len(res.Lists)))
+	response.ToResponse(res)
 	return
 }

@@ -12,7 +12,7 @@ func main() {
 	// init(根据配置启动注册所有全局变量)
 	setup.Init()
 
-	global.Logger.Infof("%s: hayuzi/%s", "blogserver", "Infof")
+	global.Logger.Infof("%s: hayuzi/%s", "blogserver", "start")
 
 	// 启动路由
 	routers := router.NewRouter()
