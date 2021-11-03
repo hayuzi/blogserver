@@ -20,7 +20,7 @@ Database:
   DbType: mysql
   UserName: root
   Password: 123456
-  Host: localhost
+  Host: 172.17.0.1
   DBName: blog
   TablePrefix:
   Charset: utf8mb4
