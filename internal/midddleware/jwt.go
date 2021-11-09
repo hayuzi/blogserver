@@ -87,6 +87,7 @@ func JWTInjectClaims() gin.HandlerFunc {
 		claims, _ := app.GetJwtClaims(c)
 		ctx := context.WithValue(c.Request.Context(), consts.ContextLoginUserKey, claims)
 		c.Request = c.Request.WithContext(ctx)
+		c.Set(consts.ContextLoginUserKey, claims)
 		c.Next()
 	}
 }

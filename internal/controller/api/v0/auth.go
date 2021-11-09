@@ -24,7 +24,7 @@ func (t Auth) AuthRegister(c *gin.Context) {
 		response.ToResponseError(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
-	svc := service.New(c.Request.Context())
+	svc := service.New(c)
 	cusErr := svc.AuthRegister(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
@@ -43,7 +43,7 @@ func (t Auth) AuthLogin(c *gin.Context) {
 		response.ToResponseError(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
-	svc := service.New(c.Request.Context())
+	svc := service.New(c)
 	cusErr := svc.AuthLogin(model.UserTypeUser, &req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
@@ -62,7 +62,7 @@ func (t Auth) AuthAdminLogin(c *gin.Context) {
 		response.ToResponseError(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
-	svc := service.New(c.Request.Context())
+	svc := service.New(c)
 	cusErr := svc.AuthLogin(model.UserTypeAdmin, &req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)

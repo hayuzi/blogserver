@@ -20,7 +20,7 @@ func (t User) Get(c *gin.Context) {
 	res := model.User{}
 	response := app.NewResponse(c)
 	id, _ := strconv.Atoi(c.Param("id"))
-	svc := service.New(c.Request.Context())
+	svc := service.New(c)
 	cusErr := svc.UserDetail(id, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
@@ -38,7 +38,7 @@ func (t User) List(c *gin.Context) {
 		response.ToResponseError(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
-	svc := service.New(c.Request.Context())
+	svc := service.New(c)
 	cusErr := svc.UserListAdmin(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
@@ -58,7 +58,7 @@ func (t User) Delete(c *gin.Context) {
 		return
 	}
 	req.Id, _ = strconv.Atoi(c.Param("id"))
-	svc := service.New(c.Request.Context())
+	svc := service.New(c)
 	cusErr := svc.UserDeleteAdmin(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)

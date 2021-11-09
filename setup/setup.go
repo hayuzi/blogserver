@@ -5,6 +5,7 @@ import (
 	"github.com/hayuzi/blogserver/internal/model"
 	"github.com/hayuzi/blogserver/pkg/logger"
 	"github.com/hayuzi/blogserver/pkg/setting"
+	"github.com/hayuzi/blogserver/pkg/tracer"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"log"
 	"time"
@@ -22,6 +23,10 @@ func Init() {
 	err = setupLogger()
 	if err != nil {
 		log.Fatalf("init.setupLogger err: %v", err)
+	}
+	err = setupTracer()
+	if err != nil {
+		log.Fatalf("init.setupTracer err: %v", err)
 	}
 }
 
@@ -73,5 +78,14 @@ func setupLogger() error {
 	// WithCaller(3) 回溯到入口文件
 	//global.Logger = logger.NewLogger(ljLogger, "", log.LstdFlags).WithCaller(3)
 	global.Logger = logger.NewLogger(ljLogger, "", log.LstdFlags)
+	return nil
+}
+
+func setupTracer() error {
+	jaegerTracer, _, err := tracer.NewJaegerTracer("blogserver", "127.0.0.1:6831")
+	if err != nil {
+		return err
+	}
+	global.Tracer = jaegerTracer
 	return nil
 }

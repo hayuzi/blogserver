@@ -28,7 +28,7 @@ func (t Upload) UploadFile(c *gin.Context) {
 		response.ToResponseError(errcode.InvalidParams)
 		return
 	}
-	svc := service.New(c.Request.Context())
+	svc := service.New(c)
 	resFileInfo, err := svc.UploadFile(upload.FileType(fileType), file, fileHeader)
 	if err != nil {
 		response.ToResponseError(errcode.UploadFileFail.WithDetails(err.Error()))

@@ -11,7 +11,7 @@ func Recovery() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
-				global.Logger.WithCallersFrames().Errorf("panic cover err: %v", err)
+				global.Logger.WithCallersFrames().Panicf(c, "panic cover err: %v", err)
 				app.NewResponse(c).ToResponseError(errcode.ServerError)
 				c.Abort()
 			}

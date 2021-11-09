@@ -14,6 +14,7 @@ func NewRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+	r.Use(midddleware.Tracing())
 	r.Use(midddleware.AccessLog())
 
 	// 限流
