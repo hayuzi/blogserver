@@ -15,6 +15,17 @@ func NewRouter() *gin.Engine {
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 	r.Use(midddleware.AccessLog())
+
+	// 限流
+	//limiter := ratelimiter.NewMethodLimiter()
+	//limiter.AddBuckets(ratelimiter.LimiterBucketRule{
+	//	Key:          "/api/v1/tags",
+	//	FillInterval: time.Second * 10,
+	//	Capacity:     10,
+	//	Quantum:      1,
+	//})
+	//r.Use(midddleware.RateLimiter(limiter))
+
 	r.Use(midddleware.Translations())
 	r.Use(midddleware.Cors())
 	r.Use(midddleware.JWTInjectClaims())

@@ -45,7 +45,7 @@ func (r *Response) ToResponseList(list interface{}, totalRows int64) {
 
 func (r *Response) ToResponseError(err *errcode.Error) {
 	_, file, line, _ := runtime.Caller(1)
-	global.Logger.Errorf("%s:%d %v", file, line, err.Error())
+	global.Logger.WithCaller(1).Errorf("%s:%d %v", file, line, err.Error())
 	response := gin.H{
 		"code": err.Code(),
 		"msg":  err.Msg(),
