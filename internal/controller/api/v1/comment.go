@@ -20,7 +20,7 @@ func (t Comment) Get(c *gin.Context) {
 	res := model.Comment{}
 	response := app.NewResponse(c)
 	id, _ := strconv.Atoi(c.Param("id"))
-	svc := service.New(c)
+	svc := service.New(c.Request.Context())
 	cusErr := svc.CommentDetail(id, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
@@ -38,7 +38,7 @@ func (t Comment) List(c *gin.Context) {
 		response.ToResponseError(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
-	svc := service.New(c)
+	svc := service.New(c.Request.Context())
 	cusErr := svc.CommentList(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
@@ -57,7 +57,7 @@ func (t Comment) Create(c *gin.Context) {
 		response.ToResponseError(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
-	svc := service.New(c)
+	svc := service.New(c.Request.Context())
 	cusErr := svc.CommentCreate(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)

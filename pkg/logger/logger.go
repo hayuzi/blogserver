@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/opentracing/opentracing-go"
+	"github.com/uber/jaeger-client-go"
 	"io"
 	"log"
 	"runtime"
@@ -112,12 +114,27 @@ func (l *Logger) WithCallersFrames() *Logger {
 }
 
 func (l *Logger) WithTrace() *Logger {
+	// ginCtx
 	ginCtx, ok := l.ctx.(*gin.Context)
 	if ok {
 		return l.WithFields(Fields{
 			"trace_id": ginCtx.GetString("X-Trace-ID"),
 			"span_id":  ginCtx.GetString("X-Span-ID"),
 		})
+	}
+	// spanCtx
+	if l.ctx != nil {
+		span := opentracing.SpanFromContext(l.ctx)
+		if span != nil {
+			_spanCtx := span.Context()
+			spanCtx, ok := _spanCtx.(jaeger.SpanContext)
+			if ok {
+				return l.WithFields(Fields{
+					"trace_id": spanCtx.TraceID().String(),
+					"span_id":  spanCtx.TraceID().String(),
+				})
+			}
+		}
 	}
 	return l
 }

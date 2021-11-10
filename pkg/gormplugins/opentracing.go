@@ -1,110 +1,78 @@
 package gormplugins
 
 import (
-	"context"
-	"fmt"
 	"github.com/opentracing/opentracing-go"
 	"gorm.io/gorm"
-	"strings"
 )
 
 const (
-	parentSpanGormKey = "opentracing:parent.span"
-	spanGormKey       = "opentracing:span"
+	callBackBeforeName = "opentracing:before"
+	callBackAfterName  = "opentracing:after"
+
+	gormParentSpanKey = "gorm"
+	gormSpanKey       = "gorm:span"
 )
 
-// WithContext SetSpanToGorm sets span to gorm settings, returns cloned DB
-func WithContext(ctx context.Context, db *gorm.DB) *gorm.DB {
-	if ctx == nil {
-		return db
-	}
-	parentSpan := opentracing.SpanFromContext(ctx)
-	if parentSpan == nil {
-		return db
-	}
-	return db.Set(parentSpanGormKey, parentSpan)
-}
+func before(db *gorm.DB) {
+	// 先从父级spans生成子span ---> 这里命名为gorm，但实际上可以自定义
+	// 自己喜欢的operationName
+	span, _ := opentracing.StartSpanFromContext(db.Statement.Context, gormParentSpanKey)
 
-// AddGormCallbacks adds callbacks for tracing, you should call SetSpanToGorm to make them work
-func AddGormCallbacks(db *gorm.DB) {
-	callbacks := newCallbacks()
-	registerCallbacks(db, "create", callbacks)
-	registerCallbacks(db, "query", callbacks)
-	registerCallbacks(db, "update", callbacks)
-	registerCallbacks(db, "delete", callbacks)
-	registerCallbacks(db, "row_query", callbacks)
-}
-
-type callbacks struct{}
-
-func newCallbacks() *callbacks {
-	return &callbacks{}
-}
-
-func (c *callbacks) beforeCreate(db *gorm.DB)   { c.before(db) }
-func (c *callbacks) afterCreate(db *gorm.DB)    { c.after(db, "INSERT") }
-func (c *callbacks) beforeQuery(db *gorm.DB)    { c.before(db) }
-func (c *callbacks) afterQuery(db *gorm.DB)     { c.after(db, "SELECT") }
-func (c *callbacks) beforeUpdate(db *gorm.DB)   { c.before(db) }
-func (c *callbacks) afterUpdate(db *gorm.DB)    { c.after(db, "UPDATE") }
-func (c *callbacks) beforeDelete(db *gorm.DB)   { c.before(db) }
-func (c *callbacks) afterDelete(db *gorm.DB)    { c.after(db, "DELETE") }
-func (c *callbacks) beforeRowQuery(db *gorm.DB) { c.before(db) }
-func (c *callbacks) afterRowQuery(db *gorm.DB)  { c.after(db, "") }
-
-func (c *callbacks) before(db *gorm.DB) {
-	// TODO@yuzi
-	span, _ := opentracing.StartSpanFromContext(db.Statement.Context, parentSpanGormKey)
-	// span = opentracing.StartSpan("sql", opentracing.ChildOf(span.Context()))
 	// 利用db实例去传递span
-	db.InstanceSet(spanGormKey, span)
-	//db.InstanceSet(startTime, time.Now())
-
-	//parentSpan := val.(opentracing.Span)
-	//tr := span.Tracer()
-
-	//ext.DBType.Set(sp, "sql")
-	//db.Set(spanGormKey, sp)
+	db.InstanceSet(gormSpanKey, span)
+	return
 }
 
-func (c *callbacks) after(db *gorm.DB, operation string) {
-	_span, ok := db.InstanceGet(spanGormKey)
+func after(db *gorm.DB) {
+	// 从GORM的DB实例中取出span
+	_span, isExist := db.InstanceGet(gormSpanKey)
+	if !isExist {
+		// 不存在就直接抛弃掉
+		return
+	}
+
+	// 断言进行类型转换
+	span, ok := _span.(opentracing.Span)
 	if !ok {
 		return
 	}
-	span := _span.(opentracing.Span)
+	// <---- 一定一定一定要Finsih掉！！！
 	defer span.Finish()
-	if operation == "" {
-		operation = strings.ToUpper(strings.Split(db.Dialector.Explain(db.Statement.SQL.String(), db.Statement.Vars...), " ")[0])
-	}
+
+	span.SetTag("db.err", db.Error)
 	span.SetTag("db.instance", db.Statement.Table)
 	span.SetTag("db.table", db.Statement.Table)
-	span.SetTag("db.method", operation)
-	span.SetTag("db.err", db.Statement.Error)
+	span.SetTag("db.sql", db.Statement.SQL.String())
 	span.SetTag("db.count", db.Statement.RowsAffected)
-
+	return
 }
 
-func registerCallbacks(db *gorm.DB, name string, c *callbacks) {
-	beforeName := fmt.Sprintf("tracing:%v_before", name)
-	afterName := fmt.Sprintf("tracing:%v_after", name)
-	gormCallbackName := fmt.Sprintf("gorm:%v", name)
-	// gorm does some magic, if you pass CallbackProcessor here - nothing works
-	switch name {
-	case "create":
-		_ = db.Callback().Create().Before(gormCallbackName).Register(beforeName, c.beforeCreate)
-		_ = db.Callback().Create().After(gormCallbackName).Register(afterName, c.afterCreate)
-	case "query":
-		_ = db.Callback().Query().Before(gormCallbackName).Register(beforeName, c.beforeQuery)
-		_ = db.Callback().Query().After(gormCallbackName).Register(afterName, c.afterQuery)
-	case "update":
-		_ = db.Callback().Update().Before(gormCallbackName).Register(beforeName, c.beforeUpdate)
-		_ = db.Callback().Update().After(gormCallbackName).Register(afterName, c.afterUpdate)
-	case "delete":
-		_ = db.Callback().Delete().Before(gormCallbackName).Register(beforeName, c.beforeDelete)
-		_ = db.Callback().Delete().After(gormCallbackName).Register(afterName, c.afterDelete)
-	case "row":
-		_ = db.Callback().Row().Before(gormCallbackName).Register(beforeName, c.beforeRowQuery)
-		_ = db.Callback().Row().After(gormCallbackName).Register(afterName, c.afterRowQuery)
-	}
+const ()
+
+type OpentracingPlugin struct{}
+
+func (op *OpentracingPlugin) Name() string {
+	return "opentracingPlugin"
 }
+
+func (op *OpentracingPlugin) Initialize(db *gorm.DB) (err error) {
+	// 开始前 - 并不是都用相同的方法，可以自己自定义
+	_ = db.Callback().Create().Before("gorm:before_create").Register(callBackBeforeName, before)
+	_ = db.Callback().Query().Before("gorm:query").Register(callBackBeforeName, before)
+	_ = db.Callback().Delete().Before("gorm:before_delete").Register(callBackBeforeName, before)
+	_ = db.Callback().Update().Before("gorm:setup_reflect_value").Register(callBackBeforeName, before)
+	_ = db.Callback().Row().Before("gorm:row").Register(callBackBeforeName, before)
+	_ = db.Callback().Raw().Before("gorm:raw").Register(callBackBeforeName, before)
+
+	// 结束后 - 并不是都用相同的方法，可以自己自定义
+	_ = db.Callback().Create().After("gorm:after_create").Register(callBackAfterName, after)
+	_ = db.Callback().Query().After("gorm:after_query").Register(callBackAfterName, after)
+	_ = db.Callback().Delete().After("gorm:after_delete").Register(callBackAfterName, after)
+	_ = db.Callback().Update().After("gorm:after_update").Register(callBackAfterName, after)
+	_ = db.Callback().Row().After("gorm:row").Register(callBackAfterName, after)
+	_ = db.Callback().Raw().After("gorm:raw").Register(callBackAfterName, after)
+	return
+}
+
+// 告诉编译器这个结构体实现了gorm.Plugin接口
+var _ gorm.Plugin = &OpentracingPlugin{}
