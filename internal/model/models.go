@@ -58,7 +58,7 @@ func NewDBEngine(dbSetting *setting.DatabaseSetting) (*gorm.DB, error) {
 	// SetConnMaxLifetime 设置了连接可复用的最大时间。
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
-	gormplugins.AddGormCallbacks(db)
+	_ = db.Use(&gormplugins.OpentracingPlugin{})
 	return db, nil
 }
 
@@ -68,11 +68,4 @@ func (model *Model) BeforeCreate(db *gorm.DB) error {
 
 func (model *Model) BeforeUpdate(db *gorm.DB) error {
 	return nil
-}
-
-func addExtraSpaceIfExist(str string) string {
-	if str != "" {
-		return " " + str
-	}
-	return ""
 }

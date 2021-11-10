@@ -20,7 +20,7 @@ func (t Article) Get(c *gin.Context) {
 	res := model.Article{}
 	response := app.NewResponse(c)
 	id, _ := strconv.Atoi(c.Param("id"))
-	svc := service.New(c)
+	svc := service.New(c.Request.Context())
 	cusErr := svc.ArticleDetailAdmin(id, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
@@ -38,7 +38,7 @@ func (t Article) List(c *gin.Context) {
 		response.ToResponseError(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
-	svc := service.New(c)
+	svc := service.New(c.Request.Context())
 	cusErr := svc.ArticleListAdmin(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
@@ -57,7 +57,7 @@ func (t Article) Create(c *gin.Context) {
 		response.ToResponseError(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
-	svc := service.New(c)
+	svc := service.New(c.Request.Context())
 	cusErr := svc.ArticleCreateAdmin(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
@@ -77,7 +77,7 @@ func (t Article) Update(c *gin.Context) {
 		return
 	}
 	req.Id, _ = strconv.Atoi(c.Param("id"))
-	svc := service.New(c)
+	svc := service.New(c.Request.Context())
 	cusErr := svc.ArticleUpdateAdmin(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
@@ -96,7 +96,7 @@ func (t Article) Delete(c *gin.Context) {
 		return
 	}
 	req.Id, _ = strconv.Atoi(c.Param("id"))
-	svc := service.New(c)
+	svc := service.New(c.Request.Context())
 	cusErr := svc.ArticleDeleteAdmin(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)

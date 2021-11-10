@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"errors"
+	"github.com/hayuzi/blogserver/global"
 	fmtAdminV1 "github.com/hayuzi/blogserver/internal/fmtter/admin/v1"
 	fmtApiV1 "github.com/hayuzi/blogserver/internal/fmtter/api/v1"
 	"github.com/hayuzi/blogserver/internal/model"
@@ -11,6 +12,7 @@ import (
 )
 
 func (d *Dao) TagPaginatedList(ctx context.Context, req *fmtApiV1.TagListReq, res *fmtApiV1.TagListRes) error {
+	global.Logger.Errorf(ctx, "test log %s", "hah")
 	res.Lists = make([]model.Tag, 0)
 	pageNum, pageSize := app.InitPagination(req.PageNum, req.PageSize)
 	offset := app.GetPageOffset(pageNum, pageSize)

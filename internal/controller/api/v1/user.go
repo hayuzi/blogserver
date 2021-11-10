@@ -23,7 +23,7 @@ func (t User) ChangePwd(c *gin.Context) {
 		response.ToResponseError(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
-	svc := service.New(c)
+	svc := service.New(c.Request.Context())
 	cusErr := svc.UserChangePwd(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)

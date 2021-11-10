@@ -68,7 +68,6 @@ func setupDBEngine() error {
 }
 
 func setupLogger() error {
-	// TODO@yuzi
 	ljLogger := &lumberjack.Logger{
 		Filename:  global.AppSetting.LogSavePath + "/" + global.AppSetting.LogFileName + global.AppSetting.LogFileExt,
 		MaxSize:   600, //最大占用空间为600MB

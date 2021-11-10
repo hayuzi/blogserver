@@ -1,34 +1,15 @@
 package main
 
 import (
-	"context"
-	"github.com/gin-gonic/gin"
-	"github.com/hayuzi/blogserver/global"
-	"github.com/hayuzi/blogserver/internal/router"
-	"github.com/hayuzi/blogserver/setup"
-	"net/http"
+	"github.com/hayuzi/blogserver/cmd"
+	"log"
 )
 
 func main() {
-	// init(根据配置启动注册所有全局变量)
-	setup.Init()
-
-	global.Logger.Infof(context.Background(), "%s: hayuzi/%s", "blogserver", "start")
-
-	// 启动路由
-	routers := router.NewRouter()
-	// 开启服务
-	gin.SetMode(global.ServerSetting.RunMode)
-	s := &http.Server{
-		Addr:           ":" + global.ServerSetting.HttpPort,
-		Handler:        routers,
-		ReadTimeout:    global.ServerSetting.ReadTimeout,
-		WriteTimeout:   global.ServerSetting.WriteTimeout,
-		MaxHeaderBytes: 1 << 20,
-	}
-	err := s.ListenAndServe()
+	// 使用cobra改造入口文件
+	err := cmd.Execute()
 	if err != nil {
-		panic(err)
+		log.Fatalf("cmd.Execute err: %v", err)
 	}
 
 }
