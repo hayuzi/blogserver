@@ -20,7 +20,7 @@ func (t Tag) Get(c *gin.Context) {
 	res := model.Tag{}
 	response := app.NewResponse(c)
 	id, _ := strconv.Atoi(c.Param("id"))
-	svc := service.New(c.Request.Context())
+	svc := service.New(c)
 	cusErr := svc.TagDetail(id, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
@@ -39,7 +39,7 @@ func (t Tag) List(c *gin.Context) {
 		response.ToResponseError(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
-	svc := service.New(c.Request.Context())
+	svc := service.New(c)
 	cusErr := svc.TagListAdmin(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
@@ -58,7 +58,7 @@ func (t Tag) All(c *gin.Context) {
 		response.ToResponseError(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
-	svc := service.New(c.Request.Context())
+	svc := service.New(c)
 	cusErr := svc.TagAllAdmin(&res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
@@ -77,7 +77,7 @@ func (t Tag) Create(c *gin.Context) {
 		response.ToResponseError(errcode.InvalidParams.WithDetails(errs.Errors()...))
 		return
 	}
-	svc := service.New(c.Request.Context())
+	svc := service.New(c)
 	cusErr := svc.TagCreateAdmin(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
@@ -97,7 +97,7 @@ func (t Tag) Update(c *gin.Context) {
 		return
 	}
 	req.Id, _ = strconv.Atoi(c.Param("id"))
-	svc := service.New(c.Request.Context())
+	svc := service.New(c)
 	cusErr := svc.TagUpdateAdmin(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)
@@ -117,7 +117,7 @@ func (t Tag) Delete(c *gin.Context) {
 		return
 	}
 	req.Id, _ = strconv.Atoi(c.Param("id"))
-	svc := service.New(c.Request.Context())
+	svc := service.New(c)
 	cusErr := svc.TagDeleteAdmin(&req, &res)
 	if cusErr != nil {
 		response.ToResponseError(cusErr)

@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"github.com/hayuzi/blogserver/global"
+	"github.com/hayuzi/blogserver/pkg/gormplugins"
 	"github.com/hayuzi/blogserver/pkg/setting"
 	"github.com/hayuzi/blogserver/pkg/util"
 	"gorm.io/driver/mysql"
@@ -57,6 +58,7 @@ func NewDBEngine(dbSetting *setting.DatabaseSetting) (*gorm.DB, error) {
 	// SetConnMaxLifetime 设置了连接可复用的最大时间。
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
+	gormplugins.AddGormCallbacks(db)
 	return db, nil
 }
 

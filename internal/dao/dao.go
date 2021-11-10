@@ -1,13 +1,16 @@
 package dao
 
-import "gorm.io/gorm"
+import (
+	"context"
+	"gorm.io/gorm"
+)
 
 type Dao struct {
 	engine *gorm.DB
 }
 
-func New(engine *gorm.DB) *Dao {
+func New(ctx context.Context, engine *gorm.DB) *Dao {
 	return &Dao{
-		engine: engine,
+		engine: engine.WithContext(ctx),
 	}
 }

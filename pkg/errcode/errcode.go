@@ -56,9 +56,11 @@ func (e *Error) StatusCode() int {
 	case ServerError.Code():
 		return http.StatusInternalServerError
 	case InvalidParams.Code():
-		return http.StatusBadRequest
+		//return http.StatusBadRequest
+		return http.StatusOK
 	case RecordNotFound.Code():
-		return http.StatusNotFound
+		//return http.StatusNotFound
+		return http.StatusOK
 	case TooManyRequests.Code():
 		return http.StatusTooManyRequests
 	case UnauthorizedTokenError.Code():
