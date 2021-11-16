@@ -4,11 +4,15 @@
 
 简单的博客系统服务端程序
 
+```
+go run main.go server -c=config/
+```
+
 ### 需要的外部支持
 
 - Mysql服务
 - jaeger服务（ localhost ）
-- 
+-
 
 ### 使用Makefile构建
 

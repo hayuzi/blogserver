@@ -8,11 +8,12 @@ import (
 	"github.com/hayuzi/blogserver/pkg/tracer"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"log"
+	"strings"
 	"time"
 )
 
-func Init() {
-	err := setupSetting()
+func Init(config string) {
+	err := setupSetting(config)
 	if err != nil {
 		log.Fatalf("init.setupSetting err: %v", err)
 	}
@@ -30,8 +31,8 @@ func Init() {
 	}
 }
 
-func setupSetting() error {
-	st, err := setting.NewSetting()
+func setupSetting(configPath string) error {
+	st, err := setting.NewSetting(strings.Split(configPath, ",")...)
 	if err != nil {
 		return err
 	}

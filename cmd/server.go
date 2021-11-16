@@ -17,11 +17,9 @@ var serverCmd = &cobra.Command{
 	Run:   startGinServer,
 }
 
-var conf = "./config/config.yaml"
-
 func startGinServer(cmd *cobra.Command, args []string) {
 	// init ( 根据配置启动注册所有全局变量, 供全部业务使用 )
-	setup.Init()
+	setup.Init(ConfigPath)
 	// 启动日志
 	global.Logger.Infof(context.Background(), "%s: hayuzi/%s", "blogserver", "start")
 	// 启动路由
@@ -42,5 +40,5 @@ func startGinServer(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	serverCmd.Flags().StringVarP(&conf, "conf", "c", "", "请输入配置文件路径")
+	RootCmd.AddCommand(serverCmd)
 }
