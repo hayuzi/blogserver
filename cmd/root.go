@@ -2,16 +2,18 @@ package cmd
 
 import "github.com/spf13/cobra"
 
-var rootCmd = &cobra.Command{
+var RootCmd = &cobra.Command{
 	Use:   "",
 	Short: "",
 	Long:  "",
 }
 
+var ConfigPath string
+
 func Execute() error {
-	return rootCmd.Execute()
+	return RootCmd.Execute()
 }
 
 func init() {
-	rootCmd.AddCommand(serverCmd)
+	serverCmd.Flags().StringVarP(&ConfigPath, "config", "c", "config/", "指定要使用的配置文件路径")
 }
