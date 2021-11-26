@@ -17,4 +17,4 @@ ENV TZ=Asia/Shanghai
 WORKDIR /data/blog
 
 EXPOSE 8081
-CMD ["./blogserver"]
+CMD ["./blogserver server"]
