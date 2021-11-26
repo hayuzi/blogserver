@@ -6,6 +6,7 @@ import (
 	"github.com/hayuzi/blogserver/pkg/logger"
 	"github.com/hayuzi/blogserver/pkg/setting"
 	"github.com/hayuzi/blogserver/pkg/tracer"
+	"github.com/hayuzi/blogserver/pkg/transfer"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"log"
 	"strings"
@@ -28,6 +29,10 @@ func Init(config string) {
 	err = setupTracer()
 	if err != nil {
 		log.Fatalf("init.setupTracer err: %v", err)
+	}
+	err = setupGinValidateTrans()
+	if err != nil {
+		log.Fatalf("init.setupGinValidateTrans err: %v", err)
 	}
 }
 
@@ -87,5 +92,14 @@ func setupTracer() error {
 		return err
 	}
 	global.Tracer = jaegerTracer
+	return nil
+}
+
+func setupGinValidateTrans() error {
+	trans, err := transfer.NewGinValidateTrans()
+	if err != nil {
+		return err
+	}
+	global.Trans = trans
 	return nil
 }

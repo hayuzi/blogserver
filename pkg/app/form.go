@@ -1,9 +1,11 @@
 package app
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	"github.com/hayuzi/blogserver/global"
 )
 
 type ValidError struct {
@@ -33,7 +35,13 @@ func BindAndValid(c *gin.Context, v interface{}) (bool, ValidErrors) {
 		trans, _ := t.(ut.Translator)
 		verrs, ok := err.(validator.ValidationErrors)
 		if !ok {
-			return true, nil
+			// 使用其他方法
+			global.Logger.Error(context.Background(), err.Error())
+			errs = append(errs, &ValidError{
+				Key:     "service",
+				Message: "参数数据类型不符合要求",
+			})
+			return true, errs
 		}
 		for key, value := range verrs.Translate(trans) {
 			errs = append(errs, &ValidError{
