@@ -57,6 +57,10 @@ func setupSetting(configPath string) error {
 	if err != nil {
 		return err
 	}
+	err = st.ReadSection("Jaeger", &global.JaegerSetting)
+	if err != nil {
+		return err
+	}
 	global.ServerSetting.ReadTimeout *= time.Second
 	global.ServerSetting.WriteTimeout *= time.Second
 	global.JWTSetting.Expire *= time.Minute
@@ -87,7 +91,7 @@ func setupLogger() error {
 }
 
 func setupTracer() error {
-	jaegerTracer, _, err := tracer.NewJaegerTracer("blogserver", "127.0.0.1:6831")
+	jaegerTracer, _, err := tracer.NewJaegerTracer(global.ServerSetting.ServiceName, global.JaegerSetting.HostPort)
 	if err != nil {
 		return err
 	}

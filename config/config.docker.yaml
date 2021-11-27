@@ -21,7 +21,7 @@ Database:
   DbType: mysql
   UserName: root
   Password: 123456
-  Host: 127.0.0.1
+  Host: 172.17.0.1
   DBName: blog
   TablePrefix:
   Charset: utf8mb4
@@ -33,7 +33,7 @@ JWT:
   Issuer: gin-blog
   Expire: 7200 #min
 Jaeger:
-  HostPort: 127.0.0.1:6831
+  HostPort: 172.17.0.1:6831
 
 
 
