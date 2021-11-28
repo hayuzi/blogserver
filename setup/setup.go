@@ -6,6 +6,7 @@ import (
 	"github.com/hayuzi/blogserver/pkg/logger"
 	"github.com/hayuzi/blogserver/pkg/setting"
 	"github.com/hayuzi/blogserver/pkg/tracer"
+	"github.com/hayuzi/blogserver/pkg/transfer"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"log"
 	"strings"
@@ -29,6 +30,10 @@ func Init(config string) {
 	if err != nil {
 		log.Fatalf("init.setupTracer err: %v", err)
 	}
+	err = setupGinValidateTrans()
+	if err != nil {
+		log.Fatalf("init.setupGinValidateTrans err: %v", err)
+	}
 }
 
 func setupSetting(configPath string) error {
@@ -49,6 +54,10 @@ func setupSetting(configPath string) error {
 		return err
 	}
 	err = st.ReadSection("JWT", &global.JWTSetting)
+	if err != nil {
+		return err
+	}
+	err = st.ReadSection("Jaeger", &global.JaegerSetting)
 	if err != nil {
 		return err
 	}
@@ -82,10 +91,19 @@ func setupLogger() error {
 }
 
 func setupTracer() error {
-	jaegerTracer, _, err := tracer.NewJaegerTracer("blogserver", "127.0.0.1:6831")
+	jaegerTracer, _, err := tracer.NewJaegerTracer(global.ServerSetting.ServiceName, global.JaegerSetting.HostPort)
 	if err != nil {
 		return err
 	}
 	global.Tracer = jaegerTracer
+	return nil
+}
+
+func setupGinValidateTrans() error {
+	trans, err := transfer.NewGinValidateTrans()
+	if err != nil {
+		return err
+	}
+	global.Trans = trans
 	return nil
 }

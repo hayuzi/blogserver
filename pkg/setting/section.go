@@ -3,6 +3,7 @@ package setting
 import "time"
 
 type ServerSetting struct {
+	ServiceName  string
 	RunMode      string
 	HttpPort     string
 	ReadTimeout  time.Duration
@@ -38,6 +39,10 @@ type JWTSetting struct {
 	Secret string
 	Issuer string
 	Expire time.Duration
+}
+
+type JaegerSetting struct {
+	HostPort string
 }
 
 var sections = make(map[string]interface{})

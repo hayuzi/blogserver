@@ -11,10 +11,10 @@ RUN GOPROXY=https://goproxy.cn,direct CGO_ENABLED=0 GOOS=linux go build -o blogs
 FROM scratch as final
 COPY --from=build /data/blog/blogserver /data/blog/blogserver
 COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
-COPY ./config /data/blog/config
+COPY ./config/config.docker.yaml /data/blog/config/config.yaml
 ENV TZ=Asia/Shanghai
 
 WORKDIR /data/blog
 
 EXPOSE 8081
-CMD ["./blogserver"]
+CMD ["./blogserver", "server"]
