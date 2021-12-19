@@ -13,13 +13,15 @@ func Tracing() gin.HandlerFunc {
 		var ctx context.Context
 		var traceId string
 		var spanId string
-
-		span := opentracing.SpanFromContext(c.Request.Context())
-		if span != nil {
-			span, ctx = opentracing.StartSpanFromContextWithTracer(c.Request.Context(), global.Tracer, c.Request.URL.Path, opentracing.ChildOf(span.Context()))
-		} else {
-			span, ctx = opentracing.StartSpanFromContextWithTracer(c.Request.Context(), global.Tracer, c.Request.URL.Path)
-		}
+		//Header中字段  Uber-Trace-Id: 5a4a0384f7facfaa:5a4a0384f7facfaa:0000000000000000:1
+		parentSpanContext, _ := opentracing.GlobalTracer().Extract(opentracing.TextMap, opentracing.HTTPHeadersCarrier(c.Request.Header))
+		span, ctx := opentracing.StartSpanFromContextWithTracer(c.Request.Context(), global.Tracer, c.Request.URL.Path, opentracing.ChildOf(parentSpanContext))
+		//span := opentracing.SpanFromContext(c.Request.Context())
+		//if parentSpanContext != nil {
+		//	span, ctx = opentracing.StartSpanFromContextWithTracer(c.Request.Context(), global.Tracer, c.Request.URL.Path, opentracing.ChildOf(parentSpanContext))
+		//} else {
+		//	span, ctx = opentracing.StartSpanFromContextWithTracer(c.Request.Context(), global.Tracer, c.Request.URL.Path)
+		//}
 		defer span.Finish()
 
 		spanContext := span.Context()
